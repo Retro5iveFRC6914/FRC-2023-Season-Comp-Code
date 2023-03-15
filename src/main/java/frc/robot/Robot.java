@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import org.ejml.equation.Variable;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -11,6 +13,7 @@ import com.ctre.phoenix.sensors.Pigeon2;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.ctre.phoenix.sensors.CANCoder;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -55,19 +58,6 @@ public class Robot extends TimedRobot {
 
   DifferentialDrive tankDrive = new DifferentialDrive(left, right);
 
-  Pigeon2 tiltSensor = new Pigeon2(4);
-
-  double pitch = 0;
-  double yaw = 0;
-
-  public double getPitch() {
-    return pitch;
-  }
-
-  public double getYaw() {
-    return yaw;
-  }
-
   /*
    * Mechanism motor controller instances.
    * 
@@ -81,9 +71,45 @@ public class Robot extends TimedRobot {
   WPI_TalonFX arm = new WPI_TalonFX(1);
   CANSparkMax intake = new CANSparkMax(11, MotorType.kBrushless);
 
-  double randomVariable = 0;
 
-  
+  /* 
+   * Declaring the Pigeon 2 gyro. Creating the variables to recieve yaw and pitch
+   * values from the sensor
+   * 
+   * Declaring the CANcoder for the Falcon 500 running the arm.
+   */
+  double getArmPos = 0;
+
+  CANCoder armSensor = new CANCoder(1);
+ 
+  /* public double getPosition() {
+    return getArmPos;
+  }
+ public void MotorLimit(){
+  if (arm.get() > 170){
+
+  arm.stopMotor();
+
+   } else if(arm.get() > ){
+arm.stopMotor();
+  }
+}*/
+
+
+
+
+  Pigeon2 tiltSensor = new Pigeon2(4);
+
+  double pitch = 0;
+  double yaw = 0;
+
+  public double getPitch() {
+    return pitch;
+  }
+
+  public double getYaw() {
+    return yaw;
+  }
 
   /**
    * The starter code uses the most generic joystick class.
@@ -101,7 +127,7 @@ public class Robot extends TimedRobot {
 
   AddressableLED ledStrip = new AddressableLED(9);
   AddressableLEDBuffer ledStripBuffer = new AddressableLEDBuffer(15);
-  
+
   /*
    * Magic numbers. Use these to adjust settings.
    */
@@ -341,10 +367,12 @@ public class Robot extends TimedRobot {
     double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
 
     if(timeElapsed < AUTO_DRIVE_TIME) {
+      //drive forward
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(-AUTO_DRIVE_SPEED, 0.0);
     } else {
+      //robot stops running
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.5, 0.0);
@@ -358,22 +386,27 @@ public class Robot extends TimedRobot {
    double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
 
     if (timeElapsed < ARM_EXTEND_TIME_S) {
+      //arm extends
       setArmMotor(ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S) {
+      //drops gamepiece
       setArmMotor(0.0);
       setIntakeMotor(autonomousIntakePower, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S) {
+      //arm retracts
       setArmMotor(-ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME) {
+      //drives backwards
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(AUTO_DRIVE_SPEED, 0.0);
     } else {
+      //robot stops running
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
@@ -386,32 +419,32 @@ public class Robot extends TimedRobot {
     double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
 
     if (timeElapsed < ARM_EXTEND_TIME_S) {
-      //Arm extends
+      //arm extends
       setArmMotor(ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S) {
-      //Drops game piece
+      //drops game piece
       setArmMotor(0.0);
       setIntakeMotor(autonomousIntakePower, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S) {
-      //Arm retracts
+      //arm retracts
       setArmMotor(-ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME) {
-      //Robot drives in reverse
+      //drives backwards
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(AUTO_DRIVE_SPEED, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME) {
-      //Robot drives forward 
+      //robot drives forward 
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(AUTO_DRIVE_SPEED, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME + AUTO_DRIVE_TIME) {
-      //Balance on charging pad
+      //balances on charging pad
       if (pitch < 0) {
         setDriveMotors(-AUTO_DRIVE_SPEED, 0.0);
       } else if (pitch > 0) {
@@ -420,7 +453,7 @@ public class Robot extends TimedRobot {
         setDriveMotors(0.0, 0.1);
       }
     } else {
-      //Stops moving
+      //robot stops running
       setArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
