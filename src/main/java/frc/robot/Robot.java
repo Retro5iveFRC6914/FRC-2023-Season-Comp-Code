@@ -78,11 +78,11 @@ public class Robot extends TimedRobot {
    * 
    * Declaring the CANcoder for the Falcon 500 running the arm.
    */
-  double getArmPos = 0;
+  /*double getArmPos = 0;
 
   CANCoder armSensor = new CANCoder(1);
  
-  /* public double getPosition() {
+  public double getPosition() {
     return getArmPos;
   }
  public void MotorLimit(){
@@ -93,8 +93,8 @@ public class Robot extends TimedRobot {
    } else if(arm.get() > ){
 arm.stopMotor();
   }
-}*/
-
+}
+*/
 
 
 
@@ -140,7 +140,7 @@ arm.stopMotor();
   /**
    * Percent output to run the arm up/down at
    */
-  static final double ARM_OUTPUT_POWER = 0.3;
+  static final double ARM_OUTPUT_POWER = 0.25;
 
   /**
    * How many amps the intake can use while picking up
@@ -175,7 +175,7 @@ arm.stopMotor();
   /**
    * Time to drive back in auto
    */
-  static final double AUTO_DRIVE_TIME = 6.0;
+  static final double AUTO_DRIVE_TIME = 5.0;
 
   /**
    * Speed to drive backwards in auto
@@ -387,7 +387,7 @@ arm.stopMotor();
 
     if (timeElapsed < ARM_EXTEND_TIME_S) {
       //arm extends
-      setArmMotor(ARM_OUTPUT_POWER);
+      setArmMotor(-ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S) {
@@ -397,7 +397,7 @@ arm.stopMotor();
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S) {
       //arm retracts
-      setArmMotor(-ARM_OUTPUT_POWER);
+      setArmMotor(ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME) {
@@ -449,8 +449,8 @@ arm.stopMotor();
         setDriveMotors(-AUTO_DRIVE_SPEED, 0.0);
       } else if (pitch > 0) {
         setDriveMotors(AUTO_DRIVE_SPEED, 0.0);
-      } else if (pitch < 0) {
-        setDriveMotors(0.0, 0.1);
+      } else if (pitch == 0) {
+        setDriveMotors(0.0, 0.0);
       }
     } else {
       //robot stops running
