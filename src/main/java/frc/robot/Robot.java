@@ -557,6 +557,20 @@ arm.stopMotor();
     }
 
     tankDrive.tankDrive(JoystickLeft.getRawAxis(1), JoystickRight.getRawAxis(1));
+    
+    if (JoystickRight.getRawButton(11)) {
+      driveLFTalon.setNeutralMode(NeutralMode.Brake);
+      driveLRTalon.setNeutralMode(NeutralMode.Brake);
+      driveRFTalon.setNeutralMode(NeutralMode.Brake);
+      driveRRTalon.setNeutralMode(NeutralMode.Brake);
+    } else if(JoystickRight.getRawButton(10)) {
+      driveLFTalon.setNeutralMode(NeutralMode.Coast);
+      driveLRTalon.setNeutralMode(NeutralMode.Coast);
+      driveRFTalon.setNeutralMode(NeutralMode.Coast);
+      driveRRTalon.setNeutralMode(NeutralMode.Coast);
+    }
+
+
 
     /*
      * Negative signs here because the values from the analog sticks are backwards
