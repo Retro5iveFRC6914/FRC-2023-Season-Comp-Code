@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import org.ejml.equation.Variable;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -68,7 +67,8 @@ public class Robot extends TimedRobot {
    * The arm is a NEO on Everybud.
    * The intake is a NEO 550 on Everybud.
    */
-  WPI_TalonFX arm = new WPI_TalonFX(1);
+  WPI_TalonFX PrimaryArm = new WPI_TalonFX(1);
+  WPI_TalonFX SecondaryArm = new WPI_TalonFX(2);
   CANSparkMax intake = new CANSparkMax(11, MotorType.kBrushless);
 
 
@@ -99,7 +99,7 @@ arm.stopMotor();
 
 
   Pigeon2 tiltSensor = new Pigeon2(4);
-
+  
   double pitch = 0;
   double yaw = 0;
 
@@ -111,6 +111,9 @@ arm.stopMotor();
     return yaw;
   }
 
+  public void gyroValues() {
+    SmartDashboard.putNumber("pitch (°)", pitch);
+  }
   /**
    * The starter code uses the most generic joystick class.
    * 
@@ -224,7 +227,8 @@ arm.stopMotor();
      * as positive, arm in is negative.
      */
 
-    arm.setInverted(false);
+    PrimaryArm.setInverted(false);
+    SecondaryArm.setInverted(false);
     intake.setInverted(false);
     intake.setIdleMode(IdleMode.kBrake);
   }
@@ -306,12 +310,20 @@ arm.stopMotor();
    * 
    * @param percent
    */
-  public void setArmMotor(double percent) {
-    arm.set(percent);
-    SmartDashboard.putNumber("arm power (%)", arm.getBusVoltage());
-    SmartDashboard.putNumber("arm motor current (amps)", arm.getStatorCurrent());
-    SmartDashboard.putNumber("arm motor temperature (C)", arm.getTemperature());
+  public void setPrimaryArmMotor(double percent) {
+    PrimaryArm.set(percent);
+    SmartDashboard.putNumber("arm power (%)", PrimaryArm.getBusVoltage());
+    SmartDashboard.putNumber("arm motor current (amps)", PrimaryArm.getStatorCurrent());
+    SmartDashboard.putNumber("arm motor temperature (C)", PrimaryArm.getTemperature());
   }
+
+  public void setSecondaryArmMotor(double percent) {
+    SecondaryArm.set(percent);
+    SmartDashboard.putNumber("arm power (%)", SecondaryArm.getBusVoltage());
+    SmartDashboard.putNumber("arm motor current (amps)", SecondaryArm.getStatorCurrent());
+    SmartDashboard.putNumber("arm motor temperature (C)", SecondaryArm.getTemperature());
+  }
+
 
   /**
    * Set the arm output power.
@@ -368,12 +380,12 @@ arm.stopMotor();
 
     if(timeElapsed < AUTO_DRIVE_TIME) {
       //drive forward
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(-AUTO_DRIVE_SPEED, 0.0);
     } else {
       //robot stops running
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.5, 0.0);
     }
@@ -387,27 +399,27 @@ arm.stopMotor();
 
     if (timeElapsed < ARM_EXTEND_TIME_S) {
       //arm extends
-      setArmMotor(-ARM_OUTPUT_POWER);
+      setPrimaryArmMotor(-ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S) {
       //drops gamepiece
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(autonomousIntakePower, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S) {
       //arm retracts
-      setArmMotor(ARM_OUTPUT_POWER);
+      setPrimaryArmMotor(ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME) {
       //drives backwards
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(AUTO_DRIVE_SPEED, 0.0);
     } else {
       //robot stops running
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     }
@@ -420,27 +432,27 @@ arm.stopMotor();
 
     if (timeElapsed < ARM_EXTEND_TIME_S) {
       //arm extends
-      setArmMotor(ARM_OUTPUT_POWER);
+      setPrimaryArmMotor(ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S) {
       //drops game piece
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(autonomousIntakePower, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S) {
       //arm retracts
-      setArmMotor(-ARM_OUTPUT_POWER);
+      setPrimaryArmMotor(-ARM_OUTPUT_POWER);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME) {
       //drives backwards
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(AUTO_DRIVE_SPEED, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME) {
       //robot drives forward 
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(AUTO_DRIVE_SPEED, 0.0);
     } else if (timeElapsed < ARM_EXTEND_TIME_S + AUTO_THROW_TIME_S + ARM_EXTEND_TIME_S + AUTO_DRIVE_TIME + AUTO_DRIVE_TIME) {
@@ -454,7 +466,7 @@ arm.stopMotor();
       }
     } else {
       //robot stops running
-      setArmMotor(0.0);
+      setPrimaryArmMotor(0.0);
       setIntakeMotor(0.0, INTAKE_CURRENT_LIMIT_A);
       setDriveMotors(0.0, 0.0);
     }
@@ -516,7 +528,9 @@ arm.stopMotor();
       // do nothing and let it sit where it is
       armPower = 0.0;
     }
-    setArmMotor(armPower);
+    setPrimaryArmMotor(armPower);
+    setSecondaryArmMotor(armPower);
+
 
     double intakePower;
     int intakeAmps;
